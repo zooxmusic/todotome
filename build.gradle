@@ -1,7 +1,5 @@
 buildscript {
-    /*ext {
-        springBootVersion = '1.5.10.RELEASE'
-    }*/
+
     repositories {
         jcenter()
     }
@@ -11,7 +9,7 @@ buildscript {
         classpath("se.transmode.gradle:gradle-docker:1.2")
         classpath "com.avast.gradle:gradle-docker-compose-plugin:0.6.12"
         classpath("io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE")
-        classpath 'ru.vyarus:gradle-quality-plugin:2.4.0'
+        classpath("ru.vyarus:gradle-quality-plugin:2.4.0")
 
     }
 }
@@ -19,8 +17,9 @@ buildscript {
 apply plugin: 'docker-compose'
 
 allprojects {
+
     apply plugin: 'java'
-    //apply plugin: 'io.spring.dependency-management'
+    apply plugin: "application"
     apply plugin: 'org.springframework.boot'
     apply plugin: "io.spring.dependency-management"
     apply plugin: 'docker'
@@ -59,6 +58,11 @@ allprojects {
         }
     }
 
+    task hello {
+        doLast { task ->
+            println "I'm $task.project.name"
+        }
+    }
     task buildDocker(type: Docker, dependsOn: build) {
         push = true
         applicationName = jar.baseName
@@ -78,6 +82,16 @@ allprojects {
 
 
 }
+
+
+task buildAll {
+    dependsOn 'clean'
+}
+
+buildAll.dependsOn(project(":eureka-server").task("install").dependsOn(project(":config-server").task("install")))
+
+
+
 dockerCompose {
     useComposeFiles = ['deploy/docker-compose.yml']
     // useComposeFiles = ['docker-compose.yml', 'docker-compose.prod.yml'] // like 'docker-compose -f <file>'; default is empty

@@ -1,3 +1,6 @@
 rootProject.name = 'todotome-parent'
 
-include "config-server", "eureka-server", "web-ui", "employee-service"
+include "config-server"
+include "eureka-server"
+include "employee-service"
+include "web-ui"
