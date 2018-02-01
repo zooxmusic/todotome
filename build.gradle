@@ -1,67 +1,78 @@
 buildscript {
+    /*ext {
+        springBootVersion = '1.5.10.RELEASE'
+    }*/
     repositories {
-        mavenCentral()
+        jcenter()
     }
+
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
-        classpath 'se.transmode.gradle:gradle-docker:1.2'
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE'
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("se.transmode.gradle:gradle-docker:1.2")
+        classpath("io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE")
+        classpath 'ru.vyarus:gradle-quality-plugin:2.4.0'
     }
 }
 
-apply plugin: 'java'
-apply plugin: 'spring-boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'docker'
+allprojects {
+    apply plugin: 'java'
+    //apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: "io.spring.dependency-management"
+    //apply plugin: 'spring-boot'
+    apply plugin: 'docker'
+    apply plugin: 'ru.vyarus.quality'
 
-group 'com.todotome'
-version '0.1.0.SNAPSHOT'
+    group = 'com.todotome'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
-dependencyManagement {
-    imports {
-        mavenBom 'io.spring.platform:platform-bom:Brussels-SR6'
+    repositories {
+        jcenter()
     }
-}
 
-dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web")
+    dependencies {
+        compile(
+                ["org.springframework.boot:spring-boot-starter-web:${springBootVersion}"],
+                ["org.springframework.cloud:spring-cloud-starter:1.3.1.RELEASE"],
+                ["org.springframework.cloud:spring-cloud-starter-config:1.4.1.RELEASE"],
+                ["org.springframework.cloud:spring-cloud-config-server:1.4.1.RELEASE"],
+                ["org.springframework.cloud:spring-cloud-starter-eureka-server:1.4.2.RELEASE"],
+                //["org.springframework.cloud:spring-cloud-stream"],
+                ["io.springfox:springfox-swagger2:${swaggerVersion}"],
+                ["io.springfox:springfox-swagger-ui:${swaggerVersion}"]
+        )
+        //runtime fileTree(dir: 'libs', include: '*.jar')
+        testCompile(
+                ["junit:junit"],
+                ["org.springframework.boot:spring-boot-starter-test:${springBootVersion}"]
+        )
+    }
+
+    /*dependencyManagement {
+        imports {
+            mavenBom 'org.springframework.cloud:spring-cloud-dependencies:Finchley.M5'
+            mavenBom 'org.springframework.cloud:spring-cloud-config:2.0.0.M5'
+            mavenBom 'org.springframework.cloud:spring-cloud-netflix:1.4.1.BUILD-SNAPSHOT'
+            mavenBom 'org.springframework.cloud:spring-cloud-stream-dependencies:Elmhurst.M3'
+        }
+    }*/
 
 
-    /**
-     * Oauth2 / jwt requirements
-     */
-    compile("org.springframework.boot:spring-boot-starter-security")
-    compile("org.springframework.security.oauth:spring-security-oauth2:${springSecurityOAuth2Version}")
-    compile("org.springframework.security:spring-security-jwt:${springSecurityJwtVersion}")
-
-    /**
-     * swagger
-     */
-    compile("io.springfox:springfox-swagger2:${swaggerVersion}")
-    compile("io.springfox:springfox-swagger-ui:${swaggerVersion}")
-
-    runtime fileTree(dir: 'libs', include: '*.jar')
-
-    testCompile("junit:junit")
-
-}
-
-
-task buildDocker(type: Docker, dependsOn: build) {
-    push = true
-    applicationName = jar.baseName
-    dockerfile = file('deploy/Dockerfile')
-    doFirst {
-        copy {
-            from jar
-            into stageDir
+    task buildDocker(type: Docker, dependsOn: build) {
+        push = true
+        applicationName = jar.baseName
+        dockerfile = file('deploy/Dockerfile')
+        doFirst {
+            copy {
+                from jar
+                into stageDir
+            }
+            copy {
+                from "${project.buildDir}/resources/main/run.sh"
+                into stageDir
+            }
         }
     }
+
 }

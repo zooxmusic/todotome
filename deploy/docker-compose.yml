@@ -1,0 +1,4 @@
+configserver:
+  image: kbastani/config-server
+  ports:
+   - "8888:8888"

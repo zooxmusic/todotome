@@ -1,0 +1,10 @@
+server:
+  port: 8888
+
+eventful:
+  appKey: HW74bCJKXKpGWfww
+
+security:
+  oauth2:
+    resource:
+      filter-order: 3
