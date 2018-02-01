@@ -1,4 +1,12 @@
 configserver:
   image: kbastani/config-server
   ports:
-   - "8888:8888"
+   - "8888:8888
+employee:
+ build: employee
+ ports:
+  - "8080"
+ links:
+  - mongodb
+mongodb:
+ image: mongo
