@@ -5,3 +5,10 @@ dependencies {
             ["org.springframework.cloud:spring-cloud-config-server"]
     )
 }
+
+
+task showme {
+    doLast{
+        println "${sourceCompatibility}"
+    }
+}
